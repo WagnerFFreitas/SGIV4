@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, LayoutDashboard, DollarSign, Calendar, MessageSquare, Settings, 
   Menu, Church, Briefcase, LogOut, ChevronRight, ClipboardList, 
-  BarChart3, UserCircle, ShieldCheck, UserCheck, Calculator, Box, 
-  PlaneTakeoff, Building2, ChevronDown, Cloud, CloudOff
+  BarChart3, UserCircle, UserCheck, Calculator, Box, 
+  PlaneTakeoff, Building2, ChevronDown
 } from 'lucide-react';
 import { UserAuth, Unit } from '../types';
 import { dbService } from '../services/databaseService';
@@ -27,7 +27,6 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, active, onClick,
     }`}
   >
     <div className={`transition-transform duration-200 ${active ? 'scale-105' : 'group-hover:scale-105'}`}>
-      {/* Fix: Explicitly defining generic type for ReactElement to allow 'size' prop in cloneElement */}
       {React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 16 })}
     </div>
     {!isCollapsed && <span className="font-semibold whitespace-nowrap text-[12px]">{label}</span>}
@@ -52,10 +51,9 @@ export const Layout: React.FC<LayoutProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
   const [isUnitSelectorOpen, setIsUnitSelectorOpen] = useState(false);
-  const [dbStatus, setDbStatus] = useState<'online' | 'offline'>('online');
 
   useEffect(() => {
-    dbService.getUnits().then(setUnits).catch(() => setDbStatus('offline'));
+    dbService.getUnits().then(setUnits).catch(console.error);
   }, []);
 
   const currentUnit = units.find(u => u.id === currentUnitId);

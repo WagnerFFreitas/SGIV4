@@ -15,11 +15,11 @@ import { Relatorios } from './components/Relatorios';
 import { Auditoria } from './components/Auditoria';
 import { PortalMembro } from './components/PortalMembro';
 import { Configuracoes } from './components/Configuracoes';
-import { UserAuth, Payroll, Member, Transaction, FinancialAccount, Unit, Asset, EmployeeLeave } from './types';
+import { UserAuth, Payroll, Member, Transaction, FinancialAccount, Asset, EmployeeLeave } from './types';
 import { dbService } from './services/databaseService';
 import { MOCK_PAYROLL, MOCK_LEAVES, MOCK_ASSETS } from './constants';
 import { 
-  User as UserIcon, Key, LogIn, Church, AlertCircle, Loader2, Cloud, Terminal
+  User as UserIcon, Key, LogIn, Church, AlertCircle, Loader2, Cloud
 } from 'lucide-react';
 
 const SYSTEM_USERS = [
@@ -40,20 +40,6 @@ const Login: React.FC<{ onLogin: (user: UserAuth) => void }> = ({ onLogin }) => 
     } else {
       setError('Credenciais inválidas. Verifique usuário e senha.');
     }
-  };
-
-  const quickDevLogin = () => {
-    const devUser = SYSTEM_USERS.find(u => u.id === 'dev')!;
-    setUsername(devUser.username);
-    setPassword(devUser.password);
-    onLogin({ 
-      id: devUser.id, 
-      name: devUser.name, 
-      username: devUser.username, 
-      role: devUser.role, 
-      avatar: devUser.avatar, 
-      unitId: devUser.unitId 
-    });
   };
 
   return (
@@ -96,16 +82,6 @@ const Login: React.FC<{ onLogin: (user: UserAuth) => void }> = ({ onLogin }) => 
               <LogIn size={20} /> Acessar Sistema Cloud
             </button>
           </form>
-
-          <div className="mt-6 flex flex-col gap-2">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Atalhos de Acesso</p>
-            <button 
-              onClick={quickDevLogin}
-              className="flex items-center justify-center gap-2 py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all text-[10px] font-black uppercase border border-slate-200"
-            >
-              <Terminal size={14} className="text-indigo-600"/> Acesso Desenvolvedor
-            </button>
-          </div>
 
           <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-center gap-2 text-[10px] font-black text-slate-400 uppercase">
              <Cloud size={12}/> PostgreSQL Supabase Engine v5.0
