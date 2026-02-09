@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { 
-  Users, TrendingUp, DollarSign, Sparkles, Target, Cake, PartyPopper, 
-  ChevronRight, AlertTriangle, FileWarning, Database, ShieldCheck
+  Users, TrendingUp, DollarSign, Sparkles, Target, 
+  ChevronRight, AlertTriangle
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { geminiService } from '../services/geminiService';
@@ -14,13 +14,13 @@ const chartData = [
   { name: 'Mai', revenue: 1890 },
 ];
 
-interface DashboardProps {
+interface PainelGeralProps {
   user: UserAuth;
   members: Member[];
   employees: Payroll[];
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ user, members, employees }) => {
+export const PainelGeral: React.FC<PainelGeralProps> = ({ user, members, employees }) => {
   const [insights, setInsights] = useState<string>('Carregando insights estratégicos...');
 
   useEffect(() => {
@@ -39,7 +39,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, members, employees }
           <h1 className="text-lg font-black text-slate-900">Olá, {user.name.split(' ')[0]}</h1>
           <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter">Sede Mundial • v5.0 ERP</p>
         </div>
-        <button className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-black text-[10px] uppercase shadow-sm">Auditoria</button>
       </div>
 
       <div className="grid grid-cols-4 gap-3">

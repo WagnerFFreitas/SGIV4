@@ -1,25 +1,25 @@
 
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
-import { Dashboard } from './components/Dashboard';
-import { Members } from './components/Members';
-import { Finance } from './components/Finance';
-import { RHView } from './components/RH';
-import { DPView } from './components/DP';
-import { Leaves } from './components/Leaves';
-import { Assets } from './components/Assets';
-import { FolhaProcessView } from './components/FolhaProcess';
-import { Events } from './components/Events';
-import { Communication } from './components/Communication';
-import { Reports } from './components/Reports';
-import { Audit } from './components/Audit';
-import { MemberPortal } from './components/MemberPortal';
-import { Settings } from './components/Settings';
+import { PainelGeral } from './components/PainelGeral';
+import { Membros } from './components/Membros';
+import { Financeiro } from './components/Financeiro';
+import { RecursosHumanos } from './components/RecursosHumanos';
+import { Funcionarios } from './components/Funcionarios';
+import { Afastamentos } from './components/Afastamentos';
+import { Patrimonio } from './components/Patrimonio';
+import { ProcessamentoFolha } from './components/ProcessamentoFolha';
+import { Eventos } from './components/Eventos';
+import { Comunicacao } from './components/Comunicacao';
+import { Relatorios } from './components/Relatorios';
+import { Auditoria } from './components/Auditoria';
+import { PortalMembro } from './components/PortalMembro';
+import { Configuracoes } from './components/Configuracoes';
 import { UserAuth, Payroll, Member, Transaction, FinancialAccount, Unit, Asset, EmployeeLeave } from './types';
 import { dbService } from './services/databaseService';
 import { MOCK_PAYROLL, MOCK_LEAVES, MOCK_ASSETS } from './constants';
 import { 
-  User as UserIcon, Key, LogIn, Church, AlertCircle, Loader2, Cloud
+  User as UserIcon, Key, LogIn, Church, AlertCircle, Loader2, Cloud, Terminal
 } from 'lucide-react';
 
 const SYSTEM_USERS = [
@@ -32,14 +32,28 @@ const Login: React.FC<{ onLogin: (user: UserAuth) => void }> = ({ onLogin }) => 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     const user = SYSTEM_USERS.find(u => u.username === username && u.password === password);
     if (user) {
       onLogin({ id: user.id, name: user.name, username: user.username, role: user.role, avatar: user.avatar, unitId: user.unitId });
     } else {
       setError('Credenciais inválidas. Verifique usuário e senha.');
     }
+  };
+
+  const quickDevLogin = () => {
+    const devUser = SYSTEM_USERS.find(u => u.id === 'dev')!;
+    setUsername(devUser.username);
+    setPassword(devUser.password);
+    onLogin({ 
+      id: devUser.id, 
+      name: devUser.name, 
+      username: devUser.username, 
+      role: devUser.role, 
+      avatar: devUser.avatar, 
+      unitId: devUser.unitId 
+    });
   };
 
   return (
@@ -49,8 +63,8 @@ const Login: React.FC<{ onLogin: (user: UserAuth) => void }> = ({ onLogin }) => 
           <div className="inline-flex p-4 bg-indigo-600 text-white rounded-[1.5rem] shadow-lg mb-6">
             <Church size={40} />
           </div>
-          <h1 className="text-3xl font-black text-slate-900 mb-2">ADJPA ERP</h1>
-          <p className="text-slate-500 font-medium mb-10 text-xs uppercase tracking-[0.2em]">Enterprise Cloud Edition</p>
+          <h1 className="text-3xl font-black text-slate-900 mb-2 tracking-tighter italic font-serif">ADJPA ERP</h1>
+          <p className="text-slate-500 font-medium mb-10 text-[10px] uppercase tracking-[0.2em]">Enterprise Cloud Edition v5.0</p>
 
           <form onSubmit={handleLogin} className="space-y-4 text-left">
             <div className="relative">
@@ -58,7 +72,7 @@ const Login: React.FC<{ onLogin: (user: UserAuth) => void }> = ({ onLogin }) => 
               <input 
                 type="text" 
                 placeholder="Usuário" 
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-sm"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
               />
@@ -68,7 +82,7 @@ const Login: React.FC<{ onLogin: (user: UserAuth) => void }> = ({ onLogin }) => 
               <input 
                 type="password" 
                 placeholder="Senha" 
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-sm"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
               />
@@ -78,10 +92,21 @@ const Login: React.FC<{ onLogin: (user: UserAuth) => void }> = ({ onLogin }) => 
                 <AlertCircle size={16} /> {error}
               </div>
             )}
-            <button className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black hover:bg-indigo-700 shadow-xl transition-all flex items-center justify-center gap-2 mt-6">
+            <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black hover:bg-indigo-700 shadow-xl transition-all flex items-center justify-center gap-2 mt-2">
               <LogIn size={20} /> Acessar Sistema Cloud
             </button>
           </form>
+
+          <div className="mt-6 flex flex-col gap-2">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Atalhos de Acesso</p>
+            <button 
+              onClick={quickDevLogin}
+              className="flex items-center justify-center gap-2 py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all text-[10px] font-black uppercase border border-slate-200"
+            >
+              <Terminal size={14} className="text-indigo-600"/> Acesso Desenvolvedor
+            </button>
+          </div>
+
           <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-center gap-2 text-[10px] font-black text-slate-400 uppercase">
              <Cloud size={12}/> PostgreSQL Supabase Engine v5.0
           </div>
@@ -117,7 +142,7 @@ const App: React.FC = () => {
         setTransactions(t);
         setAccounts(a);
       } catch (err) {
-        console.error("Erro ao carregar dados remotos. Verifique as configurações do Supabase.");
+        console.error("Erro ao carregar dados remotos.");
       } finally {
         setIsLoading(false);
       }
@@ -126,15 +151,6 @@ const App: React.FC = () => {
     if (currentUser) fetchData();
     else setIsLoading(false);
   }, [currentUser]);
-
-  const syncMembers = async (newList: Member[]) => {
-     setMembers(newList);
-     // Em produção, salvaria individualmente via dbService.saveMember
-  };
-
-  const handleUpdateTransactions = async (newList: Transaction[]) => {
-    setTransactions(newList);
-  };
 
   if (isLoading) return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
@@ -154,39 +170,39 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard user={currentUser} members={unitMembers} employees={unitEmployees} />;
+      case 'dashboard': return <PainelGeral user={currentUser} members={unitMembers} employees={unitEmployees} />;
       case 'members': return (
-        <Members 
+        <Membros 
           members={unitMembers} 
           currentUnitId={currentUnitId}
-          setMembers={syncMembers} 
-          setTransactions={handleUpdateTransactions}
+          setMembers={setMembers} 
+          setTransactions={setTransactions}
           accounts={unitAccounts}
           setAccounts={setAccounts}
         />
       );
       case 'finance': return (
-        <Finance 
+        <Financeiro 
           transactions={unitTransactions} 
           currentUnitId={currentUnitId}
-          setTransactions={handleUpdateTransactions}
+          setTransactions={setTransactions}
           accounts={unitAccounts}
           setAccounts={setAccounts}
           user={currentUser}
         />
       );
-      case 'assets': return <Assets assets={unitAssets} setAssets={setAssets} currentUnitId={currentUnitId} />;
-      case 'rh': return <RHView employees={unitEmployees} />;
-      case 'dp': return <DPView employees={unitEmployees} setEmployees={setEmployees} currentUnitId={currentUnitId} />;
-      case 'leaves': return <Leaves leaves={unitLeaves} setLeaves={setLeaves} currentUnitId={currentUnitId} />;
-      case 'payroll': return <FolhaProcessView employees={unitEmployees} setEmployees={setEmployees} />;
-      case 'events': return <Events />;
-      case 'reports': return <Reports />;
-      case 'messages': return <Communication members={unitMembers} employees={unitEmployees} />;
-      case 'audit': return <Audit />;
-      case 'portal': return <MemberPortal />;
-      case 'settings': return <Settings user={currentUser} />;
-      default: return <Dashboard user={currentUser} members={unitMembers} employees={unitEmployees} />;
+      case 'assets': return <Patrimonio assets={unitAssets} setAssets={setAssets} currentUnitId={currentUnitId} />;
+      case 'rh': return <RecursosHumanos employees={unitEmployees} />;
+      case 'dp': return <Funcionarios employees={unitEmployees} setEmployees={setEmployees} currentUnitId={currentUnitId} />;
+      case 'leaves': return <Afastamentos leaves={unitLeaves} setLeaves={setLeaves} currentUnitId={currentUnitId} />;
+      case 'payroll': return <ProcessamentoFolha employees={unitEmployees} setEmployees={setEmployees} />;
+      case 'events': return <Eventos />;
+      case 'reports': return <Relatorios />;
+      case 'messages': return <Comunicacao members={unitMembers} employees={unitEmployees} />;
+      case 'audit': return <Auditoria />;
+      case 'portal': return <PortalMembro />;
+      case 'settings': return <Configuracoes user={currentUser} />;
+      default: return <PainelGeral user={currentUser} members={unitMembers} employees={unitEmployees} />;
     }
   };
 

@@ -17,7 +17,8 @@
     "lucide-react": "^0.562.0",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
-    "html2canvas": "^1.4.1"
+    "html2canvas": "^1.4.1",
+    "export ": "^0.1.337"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
