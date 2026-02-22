@@ -11,6 +11,7 @@
         body { font-family: 'Inter', sans-serif; }
         
         @media print {
+            body { background: white !important; }
             body * { visibility: hidden !important; }
             #printable-area, #printable-area * { visibility: visible !important; }
             #printable-area {
@@ -19,12 +20,22 @@
                 top: 0 !important;
                 width: 100% !important;
                 margin: 0 !important;
-                padding: 0 !important;
+                padding: 10mm !important;
                 background: white !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 10mm !important;
             }
             .no-print { display: none !important; }
-            @page { size: A4; margin: 10mm; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: A4; margin: 0; }
+            * { 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                color-adjust: exact !important;
+            }
+            /* Garante que cada carteirinha tenha seu espaço */
+            .no-break { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -51,8 +62,10 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-slate-50 text-slate-900 overflow-hidden">
     <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>

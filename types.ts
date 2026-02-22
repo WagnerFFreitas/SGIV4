@@ -7,7 +7,7 @@ export interface UserAuth {
   username: string;
   role: UserRole;
   avatar?: string;
-  unitId: string; // Unidade preferencial/atual
+  unitId: string;
 }
 
 export interface Unit {
@@ -28,10 +28,10 @@ export interface Asset {
   acquisitionDate: string;
   acquisitionValue: number;
   currentValue: number;
-  depreciationRate: number; // % ao ano
+  depreciationRate: number;
   location: string;
   condition: 'NOVO' | 'BOM' | 'REGULAR' | 'PRECÁRIO';
-  assetNumber: string; // Número de tombamento
+  assetNumber: string;
   observations?: string;
 }
 
@@ -69,9 +69,74 @@ export interface Dependent {
   cpf?: string;
 }
 
+// Added missing FinancialAccount interface
+export interface FinancialAccount {
+  id: string;
+  unitId: string;
+  name: string;
+  type: 'CASH' | 'BANK';
+  currentBalance: number;
+}
+
+// Added missing Transaction interface
+export interface Transaction {
+  id: string;
+  unitId: string;
+  description: string;
+  amount: number;
+  date: string;
+  competencyDate: string;
+  type: 'INCOME' | 'EXPENSE';
+  category: string;
+  costCenter: string;
+  accountId: string;
+  memberId?: string;
+  status: 'PAID' | 'PENDING';
+  isConciliated?: boolean;
+  operationNature: string;
+  projectId?: string;
+  createdAt?: string;
+  paymentMethod?: 'PIX' | 'CASH' | 'CREDIT_CARD';
+  providerName?: string;
+}
+
+// Added missing ChurchEvent interface
+export interface ChurchEvent {
+  id: string;
+  unitId: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  attendeesCount: number;
+  type: 'SERVICE' | 'MEETING' | 'EVENT';
+}
+
+// Added missing AuditLog interface
+export interface AuditLog {
+  id: string;
+  unitId: string;
+  userId: string;
+  userName: string;
+  action: string;
+  entity: string;
+  date: string;
+  ip: string;
+}
+
+// Added missing TaxConfig interface
+export interface TaxConfig {
+  inssBrackets: { limit: number; rate: number }[];
+  irrfBrackets: { limit: number; rate: number; deduction: number }[];
+  fgtsRate: number;
+  patronalRate: number;
+  ratRate: number;
+}
+
 export interface Member {
   id: string;
-  unitId: string; // Vínculo com a igreja específica
+  unitId: string;
   name: string;
   cpf: string;
   rg: string;
@@ -81,6 +146,14 @@ export interface Member {
   profession?: string;
   role: 'MEMBER' | 'VISITOR' | 'VOLUNTEER' | 'STAFF' | 'LEADER';
   status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
+  
+  // Filiação
+  fatherName?: string;
+  motherName?: string;
+
+  // Emergência e Saúde
+  bloodType?: string;
+  emergencyContact?: string;
   
   // Vida Cristã
   conversionDate?: string;
@@ -108,6 +181,13 @@ export interface Member {
   isRegularGiver: boolean;
   participatesCampaigns: boolean;
   contributions: MemberContribution[];
+  
+  // Dados de RH / Pagamento
+  bank?: string;
+  bankAgency?: string;
+  bankAccount?: string;
+  pixKey?: string;
+  dependents?: Dependent[];
 
   birthDate: string;
   gender: 'M' | 'F' | 'OTHER';
@@ -227,90 +307,4 @@ export interface Payroll {
     city: string;
     state: string;
   };
-}
-
-export interface Transaction {
-  id: string;
-  unitId: string;
-  description: string;
-  amount: number;
-  date: string;
-  competencyDate?: string;
-  type: 'INCOME' | 'EXPENSE';
-  category: string;
-  operationNature?: string;
-  costCenter?: string;
-  projectId?: string;
-  accountId: string;
-  memberId?: string;
-  reference?: string;
-  invoiceNumber?: string;
-  paymentMethod?: 'CASH' | 'PIX' | 'CREDIT_CARD';
-  providerName?: string;
-  providerCpf?: string;
-  providerCnpj?: string;
-  isInstallment?: boolean;
-  installmentsCount?: number;
-  currentInstallment?: number;
-  status?: 'PAID' | 'PENDING' | 'CANCELLED';
-  isConciliated?: boolean;
-  attachmentUrl?: string;
-  createdBy?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface FinancialAccount {
-  id: string;
-  unitId: string;
-  name: string;
-  type: 'CASH' | 'BANK';
-  currentBalance: number;
-}
-
-export interface AuditLog {
-  id: string;
-  unitId: string;
-  userId: string;
-  userName: string;
-  action: string;
-  entity: string;
-  date: string;
-  ip: string;
-}
-
-export interface ChurchEvent {
-  id: string;
-  unitId: string;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: string;
-  attendeesCount: number;
-  type: 'SERVICE' | 'MEETING' | 'COURSE' | 'RETREAT';
-}
-
-export interface TaxBracket {
-  limit: number;
-  rate: number;
-  deduction?: number;
-}
-
-export interface TaxConfig {
-  inssBrackets: TaxBracket[];
-  irrfBrackets: TaxBracket[];
-  fgtsRate: number;
-  patronalRate: number;
-  ratRate: number;
-}
-
-export interface DigitalCertificate {
-  id: string;
-  ownerName: string;
-  cnpj: string;
-  expiryDate: string;
-  issuer: string;
-  status: 'VALID' | 'EXPIRED' | 'REVOKED';
-  serialNumber: string;
 }

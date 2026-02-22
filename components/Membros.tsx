@@ -1,14 +1,16 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   Search, Edit2, X, User, Plus, Printer, QrCode, Square, CheckSquare, 
-  Loader2, Save, Trash2, Camera, Heart, Baby, Flame, Award, Map, AlertCircle, DollarSign, Star, Users, TrendingUp, Download
+  Loader2, Save, Trash2, Camera, Heart, Baby, Flame, Award, Map, AlertCircle, 
+  DollarSign, Star, Users, TrendingUp, Download, Phone, Mail, Briefcase, 
+  Info, Sparkles, BookOpen, MapPin, Calendar, History, Tag, Landmark, Users2, Wand2
 } from 'lucide-react';
-import { Member, Transaction, FinancialAccount } from '../types';
+import { Member, Transaction, FinancialAccount, MemberContribution, Dependent } from '../types';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { TemplateCarteiraMembro } from './TemplateCarteiraMembro';
 
-type MemberTab = 'pessoais' | 'familia' | 'vida_crista' | 'ministerios' | 'endereco' | 'financeiro' | 'observacoes';
+type MemberTab = 'pessoais' | 'endereco' | 'vida_crista' | 'ministerios' | 'financeiro' | 'rh' | 'outros';
 
 interface MembrosProps {
   members: Member[];
@@ -18,77 +20,6 @@ interface MembrosProps {
   accounts: FinancialAccount[];
   setAccounts: (newList: FinancialAccount[]) => void;
 }
-
-const CarteiraMembro: React.FC<{ member: Member, id?: string }> = ({ member, id }) => (
-  <div id={id} className="flex flex-row items-start justify-center gap-0 print:mb-0 mb-6 no-break bg-white shadow-sm rounded-xl overflow-hidden border border-slate-200" style={{ pageBreakInside: 'avoid', breakInside: 'avoid', width: '171.2mm', minWidth: '171.2mm', height: '53.98mm' }}>
-    {/* Frente - CR80 (85.6mm) - Estilo Dark */}
-    <div className="w-[85.6mm] h-[53.98mm] bg-[#0c0e2a] relative overflow-hidden flex flex-col p-4 text-white shrink-0">
-      <div className="flex justify-between items-start w-full mb-3">
-        <div className="flex items-center gap-2">
-          <div className="bg-white p-1 rounded-md">
-            <img src="https://i.ibb.co/3yk0Q9k/logo-church.png" className="w-6 h-6 object-contain" alt="Logo" />
-          </div>
-          <div className="text-left leading-none">
-            <p className="text-[10px] font-black uppercase tracking-tight">ADJPA</p>
-            <p className="text-[5px] font-bold text-indigo-400 uppercase tracking-tighter">Assembleia de Deus</p>
-          </div>
-        </div>
-        <div className="bg-[#4d4fdf] px-2 py-0.5 rounded-full">
-           <span className="text-[6px] font-black text-white uppercase tracking-widest">MEMBRO</span>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4 mt-1">
-        <div className="w-18 h-20 rounded-lg bg-[#1e2238] border border-white/10 overflow-hidden shrink-0 shadow-lg">
-          <img 
-            src={member.avatar} 
-            className="w-full h-full object-cover" 
-            crossOrigin="anonymous" 
-            onError={(e) => (e.currentTarget.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(member.name))} 
-          />
-        </div>
-        <div className="flex-1 flex flex-col justify-center">
-           <h4 className="text-[12px] font-black uppercase leading-tight mb-0.5 text-white tracking-tight">{member.name}</h4>
-           <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-3">MEMBRO ATIVO</p>
-           
-           <div className="space-y-0.5">
-              <p className="text-[4px] font-black text-slate-400 uppercase tracking-widest">Congregação</p>
-              <p className="text-[7px] font-bold text-white uppercase">SEDE MUNDIAL</p>
-           </div>
-        </div>
-      </div>
-      
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4d4fdf] via-[#7c7ef4] to-[#4d4fdf]"></div>
-    </div>
-    
-    {/* Verso - CR80 (85.6mm) - Estilo Clean */}
-    <div className="w-[85.6mm] h-[53.98mm] bg-white relative overflow-hidden flex p-4 shrink-0">
-      <div className="flex-1 flex flex-col">
-        <h4 className="text-[10px] font-black text-[#0c0e2a] uppercase border-b border-slate-100 pb-1 mb-3 tracking-tighter">Credencial de Identificação</h4>
-        
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-auto">
-          <div><p className="text-[4px] font-black text-slate-400 uppercase mb-0.5">CPF</p><p className="text-[8px] font-bold text-slate-900">{member.cpf || '---'}</p></div>
-          <div><p className="text-[4px] font-black text-slate-400 uppercase mb-0.5">Data Nasc.</p><p className="text-[8px] font-bold text-slate-900">{member.birthDate}</p></div>
-          <div><p className="text-[4px] font-black text-slate-400 uppercase mb-0.5">Data Batismo</p><p className="text-[8px] font-bold text-slate-900">{member.baptismDate || '---'}</p></div>
-          <div><p className="text-[4px] font-black text-slate-400 uppercase mb-0.5">Validade</p><p className="text-[8px] font-black text-rose-600">31/12/2025</p></div>
-        </div>
-
-        <div className="mt-auto border-t border-dashed border-slate-200 pt-1 text-center">
-          <p className="text-[5px] text-slate-600 uppercase font-black tracking-widest leading-none">Assinatura do Pastor Presidente</p>
-        </div>
-      </div>
-
-      <div className="w-16 flex flex-col items-center justify-center gap-1 border-l border-slate-50 pl-2 ml-2">
-        <div className="p-1 bg-white rounded border border-slate-100 shadow-sm">
-          <QrCode size={40} className="text-[#0c0e2a]"/>
-        </div>
-        <div className="text-center">
-          <p className="text-[4px] font-black text-indigo-700 uppercase leading-none">Validação<br/>Digital</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMembers, setTransactions, accounts, setAccounts }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,15 +39,73 @@ export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMem
   }), [members]);
 
   const [formData, setFormData] = useState<Partial<Member>>({
-    name: '', cpf: '', rg: '', email: '', phone: '', status: 'ACTIVE', role: 'MEMBER', gender: 'M',
-    address: { zipCode: '', street: '', number: '', neighborhood: '', city: '', state: '' },
-    unitId: currentUnitId, contributions: [], otherMinistries: []
+    name: '', cpf: '', rg: '', email: '', phone: '', whatsapp: '', profession: '',
+    status: 'ACTIVE', role: 'MEMBER', gender: 'M', maritalStatus: 'SINGLE',
+    address: { zipCode: '', street: '', number: '', complement: '', neighborhood: '', city: '', state: '' },
+    unitId: currentUnitId, contributions: [], otherMinistries: [],
+    holySpiritBaptism: 'NAO', discipleshipCourse: 'NAO_INICIADO', biblicalSchool: 'NAO_FREQUENTA',
+    isTithable: false, isRegularGiver: false, participatesCampaigns: false,
+    dependents: [], bloodType: 'A+', emergencyContact: ''
   });
 
   const filteredMembers = members.filter(m => 
     m.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     (m.cpf && m.cpf.includes(searchTerm))
   );
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, avatar: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const fillWithDummyData = () => {
+    const maleNames = ["Gabriel Silva Santos", "Fernando Henrique Lima", "Roberto Carlos Mendes", "Anderson Silva Oliveira", "Marcos Paulo Costa"];
+    const femaleNames = ["Mariana Costa Souza", "Patrícia Gomes Oliveira", "Luciana Maria Ferreira", "Cláudia Regina Diniz", "Beatriz Alcantara"];
+    
+    const isMale = Math.random() > 0.5;
+    const randomName = isMale 
+      ? maleNames[Math.floor(Math.random() * maleNames.length)] 
+      : femaleNames[Math.floor(Math.random() * femaleNames.length)];
+
+    const randomCPF = `${Math.floor(Math.random()*900+100)}.${Math.floor(Math.random()*900+100)}.${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*90+10)}`;
+    const randomRG = `${Math.floor(Math.random()*90+10)}.${Math.floor(Math.random()*900+100)}.${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9+1)}`;
+    const randomPhone = `(11) 9${Math.floor(Math.random()*9000+1000)}-${Math.floor(Math.random()*9000+1000)}`;
+
+    setFormData({
+      ...formData,
+      name: randomName,
+      cpf: randomCPF,
+      rg: randomRG,
+      email: `${randomName.split(' ')[0].toLowerCase()}@exemplo.com.br`,
+      phone: randomPhone,
+      whatsapp: randomPhone,
+      gender: isMale ? 'M' : 'F',
+      birthDate: `${1970 + Math.floor(Math.random() * 30)}-0${1 + Math.floor(Math.random() * 8)}-${10 + Math.floor(Math.random() * 18)}`,
+      fatherName: isMale ? "José de Arimateia Santos" : "Manoel Gomes Ferreira",
+      motherName: isMale ? "Maria do Carmo Silva" : "Regina Célia Oliveira",
+      bloodType: ["A+", "B+", "O+", "AB+", "O-", "A-"][Math.floor(Math.random() * 6)],
+      emergencyContact: `(21) 9${Math.floor(Math.random()*9000+1000)}-${Math.floor(Math.random()*9000+1000)} (Esposa/Marido)`,
+      address: {
+        zipCode: "01001-000",
+        street: "Praça da Sé",
+        number: String(Math.floor(Math.random() * 1000)),
+        neighborhood: "Centro",
+        city: "São Paulo",
+        state: "SP"
+      },
+      ecclesiasticalPosition: ["Membro", "Diácono", "Presbítero", "Missionária", "Obreiro"][Math.floor(Math.random() * 5)],
+      mainMinistry: ["Louvor", "Infantil", "Ação Social", "Missões", "Ensino"][Math.floor(Math.random() * 5)],
+      baptismDate: "2010-05-22",
+      membershipDate: "2015-01-10",
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(randomName)}&background=${isMale ? '003399' : 'e11d48'}&color=fff&bold=true`
+    });
+  };
 
   const handleCEPLookup = async (cep: string) => {
     const clean = cep.replace(/\D/g, '');
@@ -143,10 +132,11 @@ export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMem
 
   const handleSave = () => {
     if (!formData.name) return alert("O nome é obrigatório.");
+    const memberId = editingMember?.id || `M${Math.floor(Math.random()*90000+10000)}`;
     const memberData = { 
       ...formData, 
-      id: editingMember?.id || Math.random().toString(36).substr(2, 9), 
-      avatar: formData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || 'M')}` 
+      id: memberId,
+      avatar: formData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || 'M')}&background=003399&color=fff&bold=true` 
     } as Member;
     
     if (editingMember) setMembers(members.map(m => m.id === editingMember.id ? memberData : m));
@@ -159,10 +149,10 @@ export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMem
   const handleDownloadPDF = async () => {
     setIsGeneratingPDF(true);
     try {
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF('p', 'mm', 'a4', true);
       const selectedMembers = members.filter(m => selectedMemberIds.includes(m.id));
       const cardHeight = 53.98;
-      const cardWidth = 171.2;
+      const cardWidth = 176.2; 
       let currentY = 15;
 
       for (let i = 0; i < selectedMembers.length; i++) {
@@ -172,15 +162,64 @@ export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMem
         }
         const el = document.getElementById(`card-to-print-${selectedMembers[i].id}`);
         if (el) {
-          const canvas = await html2canvas(el, { scale: 3, useCORS: true });
-          const imgData = canvas.toDataURL('image/png');
-          pdf.addImage(imgData, 'PNG', 19, currentY, cardWidth, cardHeight);
+          const canvas = await html2canvas(el, { 
+            scale: 8, 
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+            imageTimeout: 0,
+            onclone: (clonedDoc) => {
+              const card = clonedDoc.getElementById(`card-to-print-${selectedMembers[i].id}`);
+              if (card) {
+                (card.style as any).fontSmooth = 'always';
+                (card.style as any).webkitFontSmoothing = 'antialiased';
+              }
+            }
+          });
+          
+          const imgData = canvas.toDataURL('image/png', 1.0);
+          pdf.addImage(imgData, 'PNG', 17, currentY, cardWidth, cardHeight, undefined, 'NONE');
           currentY += cardHeight + 8;
         }
       }
-      pdf.save(`Lote_Carteirinhas_${new Date().getTime()}.pdf`);
-    } catch (e) { console.error(e); } finally { setIsGeneratingPDF(false); }
+      pdf.save(`Lote_Carteirinhas_UltraHD_${new Date().getTime()}.pdf`);
+    } catch (e) { 
+      console.error("Erro ao gerar PDF:", e);
+      alert("Houve um erro ao gerar o PDF. Tente imprimir direto.");
+    } finally { 
+      setIsGeneratingPDF(false); 
+    }
   };
+
+  const handleDirectPrint = () => { window.print(); };
+
+  const InputField = ({ label, value, onChange, placeholder = "", type = "text", className = "" }: any) => (
+    <div className={className}>
+      <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block tracking-wider">{label}</label>
+      <input 
+        type={type}
+        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+        value={value || ''} 
+        onChange={e => onChange(e.target.value)} 
+        placeholder={placeholder}
+      />
+    </div>
+  );
+
+  const SelectField = ({ label, value, onChange, options, className = "" }: any) => (
+    <div className={className}>
+      <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block tracking-wider">{label}</label>
+      <select 
+        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+      >
+        {options.map((opt: any) => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
+  );
 
   return (
     <div className="space-y-4 pb-16">
@@ -196,28 +235,17 @@ export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMem
           >
             <Printer size={14} /> Imprimir ({selectedMemberIds.length})
           </button>
-          <button onClick={() => { setEditingMember(null); setFormData({name: '', unitId: currentUnitId, address: {zipCode:'', street:'', number:'', neighborhood:'', city:'', state:''}}); setIsModalOpen(true); }} className="flex items-center gap-1.5 px-5 py-1.5 bg-slate-900 text-white rounded-lg font-bold text-[10px] uppercase shadow-md hover:bg-slate-800 transition-all"><Plus size={14} /> Novo Cadastro</button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 gap-3">
-        {[{l: 'Ativos', v: stats.active, i: <User/>, c: 'indigo'}, {l: 'Liderança', v: stats.leaders, i: <Star/>, c: 'amber'}, {l: 'Visitantes', v: stats.visitors, i: <TrendingUp/>, c: 'blue'}, {l: 'Total Base', v: stats.total, i: <Users/>, c: 'slate'}].map((s, i) => (
-          <div key={i} className="bg-white p-3 rounded-xl border border-slate-100 flex items-center gap-3 shadow-sm hover:shadow-md transition-all">
-            <div className={`p-2 rounded-lg bg-${s.c}-50 text-${s.c}-600`}>
-              {React.cloneElement(s.i as React.ReactElement<{ size?: number }>, { size: 16 })}
-            </div>
-            <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase leading-none tracking-widest">{s.l}</p>
-              <p className="text-lg font-black text-slate-900 mt-0.5">{s.v}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col sm:flex-row gap-2">
-        <div className="flex-1 relative">
-          <Search className="absolute left-2.5 top-2 text-slate-400" size={14} />
-          <input type="text" placeholder="Pesquisar por nome ou CPF..." className="w-full pl-8 pr-4 py-1.5 bg-transparent outline-none text-[12px] font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <button onClick={() => { 
+            setEditingMember(null); 
+            setFormData({
+              name: '', unitId: currentUnitId, status: 'ACTIVE', role: 'MEMBER',
+              address: {zipCode:'', street:'', number:'', complement: '', neighborhood:'', city:'', state:''},
+              isTithable: false, isRegularGiver: false, participatesCampaigns: false, contributions: [], otherMinistries: [], dependents: [], bloodType: 'A+', emergencyContact: ''
+            }); 
+            setIsModalOpen(true); 
+          }} className="flex items-center gap-1.5 px-5 py-1.5 bg-slate-900 text-white rounded-lg font-bold text-[10px] uppercase shadow-md hover:bg-slate-800 transition-all">
+            <Plus size={14} /> Novo Cadastro
+          </button>
         </div>
       </div>
 
@@ -225,26 +253,38 @@ export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMem
         <table className="w-full text-left">
           <thead className="bg-slate-50/30 text-[10px] text-slate-400 font-black uppercase tracking-wider border-b border-slate-100">
             <tr>
-              <th className="px-4 py-3 w-10 text-center"><div onClick={() => setSelectedMemberIds(selectedMemberIds.length === filteredMembers.length ? [] : filteredMembers.map(m => m.id))} className="cursor-pointer mx-auto">{selectedMemberIds.length === filteredMembers.length && filteredMembers.length > 0 ? <CheckSquare size={16} className="text-indigo-600"/> : <Square size={16} className="text-slate-300"/>}</div></th>
-              <th className="px-3 py-3">Identificação</th>
-              <th className="px-6 py-3">Cargo / Ministério</th>
+              <th className="px-4 py-3 w-10 text-center">
+                <div onClick={() => setSelectedMemberIds(selectedMemberIds.length === filteredMembers.length ? [] : filteredMembers.map(m => m.id))} className="cursor-pointer mx-auto">
+                  {selectedMemberIds.length === filteredMembers.length && filteredMembers.length > 0 ? <CheckSquare size={16} className="text-indigo-600"/> : <Square size={16} className="text-slate-300"/>}
+                </div>
+              </th>
+              <th className="px-3 py-3">Membro</th>
+              <th className="px-6 py-3">Cargo / CPF</th>
               <th className="px-6 py-3 text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 text-[11px]">
             {filteredMembers.map((member) => (
               <tr key={member.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-2.5 text-center"><div onClick={() => setSelectedMemberIds(p => p.includes(member.id) ? p.filter(id => id !== member.id) : [...p, member.id])} className="cursor-pointer mx-auto">{selectedMemberIds.includes(member.id) ? <CheckSquare size={16} className="text-indigo-600"/> : <Square size={16} className="text-slate-300"/>}</div></td>
-                <td className="px-3 py-2.5">
-                  <div className="flex items-center gap-3">
-                    <img src={member.avatar} className="w-8 h-8 rounded-lg object-cover border border-slate-100 shadow-sm" alt="" />
-                    <div><p className="font-bold text-slate-900 leading-none">{member.name}</p><p className="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">CPF: {member.cpf || '---'}</p></div>
+                <td className="px-4 py-2.5 text-center">
+                  <div onClick={() => setSelectedMemberIds(p => p.includes(member.id) ? p.filter(id => id !== member.id) : [...p, member.id])} className="cursor-pointer mx-auto">
+                    {/* Fixed Error: Changed selectedIds to selectedMemberIds */}
+                    {selectedMemberIds.includes(member.id) ? <CheckSquare size={16} className="text-indigo-600"/> : <Square size={16} className="text-slate-300"/>}
                   </div>
                 </td>
-                <td className="px-6 py-2.5 font-bold text-slate-700">{member.ecclesiasticalPosition || 'Membro'}</td>
-                <td className="px-6 py-2.5 text-right flex justify-end gap-2 text-slate-400">
-                   <button onClick={() => { setEditingMember(member); setSelectedMemberIds([member.id]); setIsIDCardOpen(true); }}><QrCode size={15} /></button>
-                   <button onClick={() => { setEditingMember(member); setFormData(member); setIsModalOpen(true); }}><Edit2 size={15} /></button>
+                <td className="px-3 py-2.5">
+                  <div className="flex items-center gap-3">
+                    <img src={member.avatar} className="w-8 h-8 rounded-lg object-cover border border-slate-100" alt="" />
+                    <div><p className="font-bold text-slate-900 leading-none">{member.name}</p><p className="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">Matrícula: {member.id}</p></div>
+                  </div>
+                </td>
+                <td className="px-6 py-2.5">
+                  <p className="font-bold text-slate-700">{member.ecclesiasticalPosition || 'Membro'}</p>
+                  <p className="text-[9px] text-slate-400 uppercase">{member.cpf || '---'}</p>
+                </td>
+                <td className="px-6 py-2.5 text-right flex justify-end gap-3 text-slate-400">
+                   <button onClick={() => { setEditingMember(member); setSelectedMemberIds([member.id]); setIsIDCardOpen(true); }}><QrCode size={16} /></button>
+                   <button onClick={() => { setEditingMember(member); setFormData(member); setIsModalOpen(true); }}><Edit2 size={16} /></button>
                 </td>
               </tr>
             ))}
@@ -254,55 +294,122 @@ export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMem
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="bg-white w-full max-w-5xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-4 border-b bg-white flex justify-between items-center">
-              <div className="flex items-center gap-2">
+          <div className="bg-white w-full max-w-5xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col h-full max-h-[95vh]">
+            <div className="p-4 border-b flex justify-between items-center">
+              <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-md"><User size={18}/></div>
-                <h2 className="text-sm font-black uppercase tracking-tight">{editingMember ? 'Editar' : 'Novo'} Registro Ministerial</h2>
+                <div>
+                  <h2 className="text-sm font-black uppercase tracking-tight">{editingMember ? 'Editar' : 'Novo'} Registro</h2>
+                </div>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-all"><X size={20}/></button>
+              <div className="flex items-center gap-3">
+                <button onClick={fillWithDummyData} className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl font-black text-[9px] uppercase hover:bg-amber-100 transition-all border border-amber-200">
+                  <Wand2 size={12}/> Preencher Teste
+                </button>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X size={20}/></button>
+              </div>
             </div>
 
-            <div className="flex border-b bg-slate-50/30 px-6 gap-6 overflow-x-auto scrollbar-hide">
+            <div className="flex border-b bg-slate-50/30 px-6 gap-6 overflow-x-auto scrollbar-hide shrink-0">
               {[
                 { id: 'pessoais', label: 'Dados Pessoais', icon: <User size={14}/> },
                 { id: 'endereco', label: 'Endereço', icon: <Map size={14}/> },
                 { id: 'vida_crista', label: 'Vida Cristã', icon: <Flame size={14}/> },
-                { id: 'ministerios', label: 'Ministério', icon: <Award size={14}/> },
+                { id: 'ministerios', label: 'Ministérios', icon: <Award size={14}/> },
                 { id: 'financeiro', label: 'Financeiro', icon: <DollarSign size={14}/> },
+                { id: 'rh', label: 'Gestão de RH', icon: <Briefcase size={14}/> },
+                { id: 'outros', label: 'Observações', icon: <Info size={14}/> },
               ].map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id as MemberTab)} className={`flex items-center gap-2 py-3 px-1 text-[10px] font-black uppercase tracking-tight transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}>
                   {tab.icon} {tab.label}
-                  {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-t-full shadow-sm" />}
+                  {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-t-full" />}
                 </button>
               ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6 bg-white">
               {activeTab === 'pessoais' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <div><label className="text-[10px] font-black text-slate-400 uppercase mb-1 block">Nome Completo</label><input className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
-                   <div><label className="text-[10px] font-black text-slate-400 uppercase mb-1 block">CPF</label><input className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.cpf} onChange={e => setFormData({...formData, cpf: e.target.value})} /></div>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
+                    <div className="relative group">
+                      <div className="w-24 h-24 rounded-3xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden">
+                        <img src={formData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || 'M')}&background=003399&color=fff&bold=true`} className="w-full h-full object-cover" />
+                      </div>
+                      <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-3xl">
+                        <Camera className="text-white mb-1" size={24} />
+                        <span className="text-[8px] text-white font-black uppercase tracking-tighter">Trocar Foto</span>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
+                      </label>
+                    </div>
+                    <div className="flex-1 grid grid-cols-2 gap-4">
+                       <InputField label="Nome Completo" value={formData.name} onChange={(v:any) => setFormData({...formData, name: v})} className="col-span-2" />
+                       <InputField label="CPF" value={formData.cpf} onChange={(v:any) => setFormData({...formData, cpf: v})} />
+                       <InputField label="RG" value={formData.rg} onChange={(v:any) => setFormData({...formData, rg: v})} />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <InputField label="E-mail" value={formData.email} onChange={(v:any) => setFormData({...formData, email: v})} />
+                    <InputField label="Telefone" value={formData.phone} onChange={(v:any) => setFormData({...formData, phone: v})} />
+                    <InputField label="WhatsApp" value={formData.whatsapp} onChange={(v:any) => setFormData({...formData, whatsapp: v})} />
+                    <InputField label="Nascimento" type="date" value={formData.birthDate} onChange={(v:any) => setFormData({...formData, birthDate: v})} />
+                    <SelectField label="Gênero" value={formData.gender} onChange={(v:any) => setFormData({...formData, gender: v})} options={[{value:'M', label:'Masculino'}, {value:'F', label:'Feminino'}]} />
+                    <SelectField label="Estado Civil" value={formData.maritalStatus} onChange={(v:any) => setFormData({...formData, maritalStatus: v})} options={[{value:'SINGLE', label:'Solteiro(a)'}, {value:'MARRIED', label:'Casado(a)'}, {value:'DIVORCED', label:'Divorciado(a)'}, {value:'WIDOWED', label:'Viúvo(a)'}]} />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                    <InputField label="Nome do Pai" value={formData.fatherName} onChange={(v:any) => setFormData({...formData, fatherName: v})} />
+                    <InputField label="Nome da Mãe" value={formData.motherName} onChange={(v:any) => setFormData({...formData, motherName: v})} />
+                  </div>
                 </div>
               )}
-              {activeTab === 'endereco' && (
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="col-span-2 relative">
-                      <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block">CEP (Sincronização Online)</label>
-                      <input className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.address?.zipCode} onChange={e => {
-                        setFormData({...formData, address: {...formData.address!, zipCode: e.target.value}});
-                        if(e.target.value.replace(/\D/g,'').length === 8) handleCEPLookup(e.target.value);
-                      }} />
-                      {isSearchingCEP && <Loader2 size={16} className="absolute right-3 top-8 animate-spin text-indigo-500"/>}
+
+              {activeTab === 'rh' && (
+                <div className="space-y-6">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 space-y-4">
+                         <h4 className="text-[10px] font-black text-indigo-600 uppercase flex items-center gap-2"><Heart size={14}/> Informações de Saúde</h4>
+                         <div className="grid grid-cols-2 gap-4">
+                            <SelectField label="Tipo Sanguíneo" value={formData.bloodType} onChange={(v:any) => setFormData({...formData, bloodType: v})} options={[{value:'A+', label:'A+'}, {value:'A-', label:'A-'}, {value:'B+', label:'B+'}, {value:'B-', label:'B-'}, {value:'O+', label:'O+'}, {value:'O-', label:'O-'}, {value:'AB+', label:'AB+'}, {value:'AB-', label:'AB-'}]} />
+                            <InputField label="Contato Emergência" value={formData.emergencyContact} onChange={(v:any) => setFormData({...formData, emergencyContact: v})} placeholder="(00) 00000-0000" />
+                         </div>
+                      </div>
+
+                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 space-y-4">
+                         <h4 className="text-[10px] font-black text-indigo-600 uppercase flex items-center gap-2"><Landmark size={14}/> Dados Bancários</h4>
+                         <div className="grid grid-cols-2 gap-4">
+                            <InputField label="Banco" value={formData.bank} onChange={(v:any) => setFormData({...formData, bank: v})} />
+                            <InputField label="Chave PIX" value={formData.pixKey} onChange={(v:any) => setFormData({...formData, pixKey: v})} />
+                         </div>
+                      </div>
                    </div>
-                   <div className="col-span-2"><label className="text-[10px] font-black text-slate-400 uppercase mb-1 block">Logradouro</label><input className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.address?.street} /></div>
+                </div>
+              )}
+
+              {activeTab === 'endereco' && (
+                <div className="grid grid-cols-12 gap-4">
+                   <InputField label="CEP" value={formData.address?.zipCode} onChange={(v:any) => setFormData({...formData, address: {...formData.address!, zipCode: v}})} className="col-span-4" />
+                   <InputField label="Cidade" value={formData.address?.city} onChange={(v:any) => setFormData({...formData, address: {...formData.address!, city: v}})} className="col-span-8" />
+                   <InputField label="Rua" value={formData.address?.street} onChange={(v:any) => setFormData({...formData, address: {...formData.address!, street: v}})} className="col-span-9" />
+                   <InputField label="Nº" value={formData.address?.number} onChange={(v:any) => setFormData({...formData, address: {...formData.address!, number: v}})} className="col-span-3" />
+                </div>
+              )}
+
+              {activeTab === 'ministerios' && (
+                <div className="grid grid-cols-2 gap-6">
+                   <InputField label="Cargo Eclesiástico" value={formData.ecclesiasticalPosition} onChange={(v:any) => setFormData({...formData, ecclesiasticalPosition: v})} />
+                   <InputField label="Ministério Principal" value={formData.mainMinistry} onChange={(v:any) => setFormData({...formData, mainMinistry: v})} />
+                   <InputField label="Data Consagração" type="date" value={formData.consecrationDate} onChange={(v:any) => setFormData({...formData, consecrationDate: v})} />
+                   <InputField label="Data Membresia" type="date" value={formData.membershipDate} onChange={(v:any) => setFormData({...formData, membershipDate: v})} />
                 </div>
               )}
             </div>
 
             <div className="p-4 border-t bg-slate-50 flex gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="flex-1 py-2.5 font-bold text-[11px] uppercase bg-white border border-slate-200 rounded-xl">Cancelar</button>
-              <button onClick={handleSave} className="flex-2 py-2.5 font-black text-[11px] uppercase bg-indigo-600 text-white rounded-xl shadow-lg flex items-center justify-center gap-2"><Save size={16}/> Sincronizar Prontuário</button>
+              <button onClick={() => setIsModalOpen(false)} className="flex-1 py-3 font-bold uppercase text-[11px] bg-white border border-slate-200 rounded-2xl">Cancelar</button>
+              <button onClick={handleSave} className="flex-2 py-3 font-black uppercase text-[11px] bg-indigo-600 text-white rounded-2xl shadow-lg flex items-center justify-center gap-2 hover:bg-indigo-700">
+                <Save size={16}/> Salvar Registro Ministerial
+              </button>
             </div>
           </div>
         </div>
@@ -310,27 +417,37 @@ export const Membros: React.FC<MembrosProps> = ({ members, currentUnitId, setMem
 
       {isIDCardOpen && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xl no-print">
-           <div className="bg-white rounded-[2.5rem] w-full max-w-4xl shadow-2xl relative flex flex-col max-h-[90vh]">
-              <div className="p-6 border-b flex justify-between items-center bg-white rounded-t-[2.5rem]">
-                 <div className="flex items-center gap-2">
-                    <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-md"><Printer size={18}/></div>
-                    <h3 className="text-lg font-black uppercase tracking-tight text-slate-900">Prévia de Credenciais CR80</h3>
+           <div className="bg-white rounded-[2.5rem] w-full max-w-5xl shadow-2xl relative flex flex-col h-[90vh] overflow-hidden">
+              <div className="p-6 border-b flex justify-between items-center bg-white shrink-0">
+                 <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-md"><Printer size={20}/></div>
+                    <div>
+                      <h3 className="text-lg font-black uppercase tracking-tight text-slate-900 leading-none">Prévia de Credenciais</h3>
+                    </div>
                  </div>
-                 <button onClick={() => setIsIDCardOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-all"><X size={20}/></button>
+                 <button onClick={() => setIsIDCardOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-all"><X size={24}/></button>
               </div>
-              <div className="flex-1 overflow-y-auto p-12 bg-slate-50 flex flex-col items-center gap-4 custom-scrollbar" id="printable-area">
+
+              <div className="flex-1 overflow-y-auto p-12 bg-slate-50 flex flex-col items-center gap-8 custom-scrollbar" id="printable-area">
                 {members.filter(m => selectedMemberIds.includes(m.id)).map(m => (
-                   <CarteiraMembro key={m.id} member={m} id={`card-to-print-${m.id}`} />
+                   <TemplateCarteiraMembro key={m.id} member={m} id={`card-to-print-${m.id}`} />
                 ))}
               </div>
-              <div className="p-6 border-t flex gap-4 bg-white rounded-b-[2.5rem] shadow-inner">
+
+              <div className="p-6 border-t flex flex-col md:flex-row gap-4 bg-white shrink-0 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)]">
                 <button 
                   onClick={handleDownloadPDF} 
                   disabled={isGeneratingPDF} 
-                  className="flex-1 py-4 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase text-xs flex items-center justify-center gap-2 shadow-xl"
+                  className="flex-1 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-xl"
                 >
-                  {isGeneratingPDF ? <Loader2 size={18} className="animate-spin"/> : <Download size={18}/>}
-                  {isGeneratingPDF ? 'Renderizando PDF...' : `Gerar Lote de Impressão (${selectedMemberIds.length})`}
+                  {isGeneratingPDF ? <Loader2 size={20} className="animate-spin"/> : <Download size={20}/>}
+                  {isGeneratingPDF ? 'Renderizando PDF Ultra HD...' : 'Baixar PDF de Alta Fidelidade (Gráfica)'}
+                </button>
+                <button 
+                  onClick={handleDirectPrint}
+                  className="flex-1 py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-xl"
+                >
+                  <Printer size={20}/> Imprimir na Impressora
                 </button>
               </div>
            </div>

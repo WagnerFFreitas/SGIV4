@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { 
-  Users, TrendingUp, DollarSign, Target, ChevronRight, Sparkles 
+  Users, TrendingUp, DollarSign, Target, Sparkles, AlertTriangle, RotateCcw, Clock
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { geminiService } from '../services/geminiService';
@@ -20,16 +20,59 @@ interface PainelGeralProps {
 }
 
 export const PainelGeral: React.FC<PainelGeralProps> = ({ user, members, employees }) => {
-  const [insights, setInsights] = useState<string>('Analisando base de dados para gerar recomendações estratégicas...');
+  const [insights, setInsights] = useState<string>('Consultando inteligência ministerial...');
+  const [isError, setIsError] = useState(false);
+  const [isLoadingInsights, setIsLoadingInsights] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const lastAnalyzedCount = useRef<number>(-1);
+
+  // Efeito para gerenciar o contador de cooldown
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const remaining = geminiService.getBlockedTimeRemaining();
+      setCooldown(remaining);
+      if (remaining === 0 && isError && insights.includes('limite de uso')) {
+        // Opcional: tentar carregar novamente ou resetar estado de erro
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isError, insights]);
+
+  const fetchInsights = useCallback(async (force = false) => {
+    if (geminiService.isQuotaBlocked()) return;
+    if (!force && lastAnalyzedCount.current === members.length) return;
+    
+    setIsLoadingInsights(true);
+    setIsError(false);
+    setInsights('Sincronizando com a nuvem de IA...');
+    
+    try {
+      const res = await geminiService.analyzeChurchHealth({
+        totalMembers: members.length,
+        activeMembers: members.filter(m => m.status === 'ACTIVE').length,
+        monthlyRevenue: 25000,
+        monthlyExpenses: 18000
+      });
+
+      if (res.includes('LIMITE_EXCEDIDO') || res.includes('ERRO_')) {
+        setIsError(true);
+        const cleanMsg = res.includes(': ') ? res.split(': ')[1] : res;
+        setInsights(cleanMsg);
+      } else {
+        setInsights(res);
+        lastAnalyzedCount.current = members.length;
+      }
+    } catch (err) {
+      setIsError(true);
+      setInsights('A conexão com a IA falhou. Verifique sua rede.');
+    } finally {
+      setIsLoadingInsights(false);
+    }
+  }, [members]);
 
   useEffect(() => {
-    geminiService.analyzeChurchHealth({
-      totalMembers: members.length,
-      activeMembers: members.filter(m => m.status === 'ACTIVE').length,
-      monthlyRevenue: 25000,
-      monthlyExpenses: 18000
-    }).then(setInsights);
-  }, [members]);
+    fetchInsights();
+  }, [fetchInsights]);
 
   return (
     <div className="space-y-4">
@@ -85,17 +128,44 @@ export const PainelGeral: React.FC<PainelGeralProps> = ({ user, members, employe
           </ResponsiveContainer>
         </div>
 
-        <div className="lg:col-span-4 bg-slate-900 p-6 rounded-[2rem] shadow-xl relative overflow-hidden flex flex-col h-80">
+        <div className={`lg:col-span-4 p-6 rounded-[2rem] shadow-xl relative overflow-hidden flex flex-col h-80 transition-colors duration-500 ${isError ? 'bg-rose-900' : 'bg-slate-900'}`}>
            <div className="absolute top-0 right-0 p-8 opacity-5"><Sparkles size={180}/></div>
-           <h3 className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em] mb-6 flex items-center gap-2 relative z-10">
-              <Sparkles size={14}/> Recomendações Estratégicas IA
+           <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 relative z-10 ${isError ? 'text-rose-200' : 'text-indigo-300'}`}>
+              {isError ? <AlertTriangle size={14}/> : <Sparkles size={14}/>} 
+              {isError ? 'Status da Inteligência' : 'Recomendações Estratégicas IA'}
            </h3>
-           <div className="flex-1 bg-white/5 backdrop-blur-md rounded-[1.5rem] p-5 border border-white/10 relative z-10">
-              <p className="text-indigo-50 text-[12px] leading-relaxed italic font-medium">"{insights}"</p>
+           <div className={`flex-1 backdrop-blur-md rounded-[1.5rem] p-5 border relative z-10 overflow-y-auto custom-scrollbar ${isError ? 'bg-white/5 border-white/20' : 'bg-white/5 border-white/10'}`}>
+              {isLoadingInsights ? (
+                <div className="flex flex-col items-center justify-center h-full gap-2 text-white/50 animate-pulse">
+                  <RotateCcw size={20} className="animate-spin" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Sincronizando...</span>
+                </div>
+              ) : (
+                <p className={`text-[12px] leading-relaxed italic font-medium ${isError ? 'text-rose-100' : 'text-indigo-50'}`}>
+                  "{insights}"
+                </p>
+              )}
            </div>
-           <div className="mt-4 flex items-center justify-between text-[8px] font-black text-indigo-400 uppercase tracking-widest relative z-10">
-              <span>Engine: Gemini 3.0 Flash</span>
-              <span>Updated: Agora</span>
+           
+           <div className="mt-4 flex items-center justify-between relative z-10">
+              <div className={`text-[8px] font-black uppercase tracking-widest flex items-center gap-2 ${isError ? 'text-rose-400' : 'text-indigo-400'}`}>
+                 <span>Engine: Gemini 3.0 Flash</span>
+                 {cooldown > 0 && (
+                   <span className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-full">
+                     <Clock size={10}/> {cooldown}s
+                   </span>
+                 )}
+              </div>
+              {isError && (
+                <button 
+                  onClick={() => fetchInsights(true)}
+                  disabled={cooldown > 0}
+                  className={`p-2 rounded-lg text-white transition-all flex items-center gap-1.5 text-[9px] font-black uppercase shadow-sm ${cooldown > 0 ? 'bg-white/5 opacity-40 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 active:scale-95'}`}
+                >
+                  <RotateCcw size={12} className={isLoadingInsights ? 'animate-spin' : ''}/> 
+                  {cooldown > 0 ? `Aguarde (${cooldown}s)` : 'Tentar Agora'}
+                </button>
+              )}
            </div>
         </div>
       </div>

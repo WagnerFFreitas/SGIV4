@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MessageSquare, Send, Sparkles, PencilLine, Eraser, History, Clock } from 'lucide-react';
+import { MessageSquare, Send, Sparkles, PencilLine, Eraser, History, Clock, AlertTriangle } from 'lucide-react';
 import { geminiService } from '../services/geminiService';
 import { Member, Payroll } from '../types';
 
@@ -14,13 +14,28 @@ export const Comunicacao: React.FC<ComunicacaoProps> = ({ members = [], employee
   const [topic, setTopic] = useState('');
   const [finalMessage, setFinalMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const generateMessage = async () => {
     if (!topic) return;
     setLoading(true);
-    const result = await geminiService.generatePastoralResponse(topic);
-    setFinalMessage(result || '');
-    setLoading(false);
+    setError(null);
+    
+    try {
+      const result = await geminiService.generatePastoralResponse(topic);
+      
+      if (result.startsWith('LIMITE_EXCEDIDO') || result.startsWith('ERRO_')) {
+        const cleanMsg = result.includes(': ') ? result.split(': ')[1] : result;
+        setError(cleanMsg);
+        // Não apaga a mensagem anterior se houver erro
+      } else {
+        setFinalMessage(result || '');
+      }
+    } catch (e) {
+      setError("Falha crítica ao conectar com o serviço de inteligência.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSendWhatsApp = () => {
@@ -52,10 +67,27 @@ export const Comunicacao: React.FC<ComunicacaoProps> = ({ members = [], employee
                 <div className="space-y-4">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Tema para Inspiração IA</label>
                   <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-32 focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-sm" placeholder="Ex: Palavra de ânimo para jovens..." value={topic} onChange={(e) => setTopic(e.target.value)} />
-                  <button onClick={generateMessage} disabled={loading || !topic} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase shadow-xl flex items-center justify-center gap-2 hover:bg-slate-800 disabled:opacity-50">{loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"/> : <Sparkles size={18}/>} Gerar Mensagem IA</button>
+                  
+                  {error && (
+                    <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-100 rounded-xl text-[11px] font-bold text-rose-600 animate-in fade-in">
+                      <AlertTriangle size={14} /> {error}
+                    </div>
+                  )}
+                  
+                  <button 
+                    onClick={generateMessage} 
+                    disabled={loading || !topic} 
+                    className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase shadow-xl flex items-center justify-center gap-2 hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-95"
+                  >
+                    {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"/> : <Sparkles size={18}/>} 
+                    {loading ? 'Consultando IA...' : 'Gerar Mensagem IA'}
+                  </button>
                 </div>
               ) : (
-                <textarea className="w-full p-6 bg-slate-50 border border-slate-200 rounded-3xl h-[280px] focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-sm leading-relaxed" placeholder="Escreva sua mensagem aqui..." value={finalMessage} onChange={(e) => setFinalMessage(e.target.value)} />
+                <div className="space-y-4">
+                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Editor de Texto</label>
+                   <textarea className="w-full p-6 bg-slate-50 border border-slate-200 rounded-3xl h-[280px] focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-sm leading-relaxed" placeholder="Escreva sua mensagem aqui..." value={finalMessage} onChange={(e) => setFinalMessage(e.target.value)} />
+                </div>
               )}
             </div>
           </div>

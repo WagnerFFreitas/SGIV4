@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { PainelGeral } from './components/PainelGeral';
@@ -46,8 +45,22 @@ const Login: React.FC<{ onLogin: (user: UserAuth) => void }> = ({ onLogin }) => 
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300 text-center">
         <div className="p-10 pt-12">
-          <div className="inline-flex p-4 bg-indigo-600 text-white rounded-[1.5rem] shadow-lg mb-6">
-            <Church size={40} />
+          {/* Container da Logo Atualizado */}
+          <div className="inline-flex p-1 bg-white border-4 border-indigo-600 rounded-[1.8rem] shadow-lg mb-6 overflow-hidden w-24 h-24 items-center justify-center">
+            <img 
+              src="img/logo.png" 
+              className="w-full h-full object-contain rounded-[1.2rem]" 
+              alt="Logo ADJPA"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                if (target.parentElement) {
+                  const icon = document.createElement('div');
+                  icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-church"><path d="M10 9h4"></path><path d="M12 7v5"></path><path d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path d="m18 9 3.52 2.147a1 1 0 0 1 .48.854V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6.999a1 1 0 0 1 .48-.854L6 9"></path><path d="M6 21V7a1 1 0 0 1 .376-.782l5-3.999a1 1 0 0 1 1.249.001l5 4A1 1 0 0 1 18 7v14"></path></svg>';
+                  target.parentElement.appendChild(icon.firstChild!);
+                }
+              }}
+            />
           </div>
           <h1 className="text-3xl font-black text-slate-900 mb-2 tracking-tighter italic font-serif">ADJPA ERP</h1>
           <p className="text-slate-500 font-medium mb-10 text-[10px] uppercase tracking-[0.2em]">Enterprise Cloud Edition v5.0</p>
@@ -96,7 +109,7 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserAuth | null>(null);
   const [currentUnitId, setCurrentUnitId] = useState<string>('u-sede');
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Inicia como false para garantir login imediato
   
   const [employees, setEmployees] = useState<Payroll[]>(MOCK_PAYROLL);
   const [members, setMembers] = useState<Member[]>([]);
@@ -125,7 +138,6 @@ const App: React.FC = () => {
     };
     
     if (currentUser) fetchData();
-    else setIsLoading(false);
   }, [currentUser]);
 
   if (isLoading) return (
