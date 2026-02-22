@@ -44,7 +44,7 @@ export const TemplateCrachaFuncionario: React.FC<TemplateCrachaFuncionarioProps>
             className="w-full h-full object-contain" 
             alt="Logo ADJPA" 
             onError={(e) => {
-              (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=ADJPA&backgroundColor=003399&fontSize=45&bold=true";
+              (e.target as HTMLElement).style.display = 'none';
             }}
           />
         </div>
