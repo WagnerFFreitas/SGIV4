@@ -177,6 +177,7 @@ const App: React.FC = () => {
           accounts={unitAccounts}
           setAccounts={setAccounts}
           user={currentUser}
+          members={unitMembers}
         />
       );
       case 'assets': return <Patrimonio assets={unitAssets} setAssets={setAssets} currentUnitId={currentUnitId} />;

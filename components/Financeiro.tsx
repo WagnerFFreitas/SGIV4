@@ -8,7 +8,7 @@ import {
   Link as LinkIcon, Paperclip, CheckCircle2, AlertCircle, Layers,
   Briefcase, History, CheckCircle, Tag, MoreHorizontal
 } from 'lucide-react';
-import { Transaction, FinancialAccount, UserAuth } from '../types';
+import { Transaction, FinancialAccount, UserAuth, Member } from '../types';
 import { COST_CENTERS, OPERATION_NATURES, CHURCH_PROJECTS } from '../constants';
 
 interface FinanceiroProps {
@@ -18,16 +18,17 @@ interface FinanceiroProps {
   accounts: FinancialAccount[];
   setAccounts: (newList: FinancialAccount[]) => void;
   user?: UserAuth;
+  members: Member[];
 }
 
-export const Financeiro: React.FC<FinanceiroProps> = ({ transactions, currentUnitId, setTransactions, accounts, setAccounts, user }) => {
+export const Financeiro: React.FC<FinanceiroProps> = ({ transactions, currentUnitId, setTransactions, accounts, setAccounts, user, members }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Partial<Transaction>>({
-    description: '', amount: 0, date: new Date().toISOString().split('T')[0], type: 'INCOME', category: 'TITHE', operationNature: 'nat6', costCenter: 'cc1', projectId: '', accountId: accounts[0]?.id || '', status: 'PAID', unitId: currentUnitId, paymentMethod: 'PIX'
+    description: '', amount: 0, date: new Date().toISOString().split('T')[0], type: 'INCOME', category: 'TITHE', operationNature: 'nat6', costCenter: 'cc1', projectId: '', accountId: accounts[0]?.id || '', status: 'PAID', unitId: currentUnitId, paymentMethod: 'PIX', memberId: ''
   });
 
   const totals = useMemo(() => transactions.reduce((acc, curr) => {
@@ -38,12 +39,26 @@ export const Financeiro: React.FC<FinanceiroProps> = ({ transactions, currentUni
     return acc;
   }, { income: 0, expense: 0, payable: 0 }), [transactions]);
 
-  const filtered = transactions.filter(t => t.description.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filtered = transactions.filter(t => 
+    t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.providerName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSave = () => {
     if (!formData.description || !formData.amount) return alert("Preencha descrição e valor.");
+    
+    // Se for dízimo e tiver membro selecionado, atualizar a descrição se estiver vazia ou genérica
+    let finalDescription = formData.description;
+    if (formData.category === 'TITHE' && formData.memberId) {
+      const member = members.find(m => m.id === formData.memberId);
+      if (member && (!finalDescription || finalDescription === 'Dízimo')) {
+        finalDescription = `Dízimo: ${member.name}`;
+      }
+    }
+
     const data = { 
       ...formData, 
+      description: finalDescription,
       id: editingId || Math.random().toString(36).substr(2, 9), 
       createdAt: new Date().toISOString(), 
       unitId: currentUnitId 
@@ -65,7 +80,7 @@ export const Financeiro: React.FC<FinanceiroProps> = ({ transactions, currentUni
         description: '', amount: 0, date: new Date().toISOString().split('T')[0], 
         type: 'INCOME', category: 'TITHE', operationNature: 'nat6', costCenter: 'cc1', 
         projectId: '', accountId: accounts[0]?.id || '', status: 'PAID', 
-        unitId: currentUnitId, paymentMethod: 'PIX' 
+        unitId: currentUnitId, paymentMethod: 'PIX', memberId: ''
       }); 
     }
     setIsModalOpen(true);
@@ -131,7 +146,15 @@ export const Financeiro: React.FC<FinanceiroProps> = ({ transactions, currentUni
                   </td>
                   <td className="px-4 py-2.5">
                     <p className="font-bold text-slate-700 leading-none mb-0.5">{t.description}</p>
-                    <p className="text-[9px] text-slate-400 font-medium uppercase">{t.providerName || 'ADJPA Matriz'}</p>
+                    <p className="text-[9px] text-slate-400 font-medium uppercase">
+                      {t.category === 'TITHE' && t.memberId ? (
+                        <span className="flex items-center gap-1 text-indigo-600 font-black">
+                          <User size={10}/> {members.find(m => m.id === t.memberId)?.name || 'Membro'}
+                        </span>
+                      ) : (
+                        t.providerName || 'ADJPA Matriz'
+                      )}
+                    </p>
                   </td>
                   <td className="px-6 py-2.5">
                     <p className="text-[9px] font-black text-indigo-600 uppercase tracking-tight leading-none">
@@ -176,7 +199,7 @@ export const Financeiro: React.FC<FinanceiroProps> = ({ transactions, currentUni
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                    <label className="text-[10px] font-black uppercase block mb-1 text-slate-400">Descrição do Lançamento / Histórico</label>
-                   <input className="w-full px-4 py-2 bg-white border border-slate-200 rounded-2xl font-bold text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                   <input className="w-full px-4 py-2 bg-white border border-slate-200 rounded-2xl font-bold text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Ex: Dízimo do mês, Pagamento de Luz..." />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase block mb-1 text-slate-400">Valor Bruto (R$)</label>
@@ -196,25 +219,55 @@ export const Financeiro: React.FC<FinanceiroProps> = ({ transactions, currentUni
                   </select>
                 </div>
                 <div>
+                  <label className="text-[10px] font-black uppercase block mb-1 text-slate-400">Categoria</label>
+                  <select className="w-full px-4 py-2 bg-white border border-slate-200 rounded-2xl font-bold text-xs outline-none" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} >
+                    <option value="TITHE">Dízimo</option>
+                    <option value="OFFERING">Oferta</option>
+                    <option value="CAMPAIGN">Campanha</option>
+                    <option value="UTILITIES">Utilidades (Luz/Água)</option>
+                    <option value="SALARY">Salários / RH</option>
+                    <option value="MAINTENANCE">Manutenção</option>
+                    <option value="OTHER">Outros</option>
+                  </select>
+                </div>
+                <div>
                   <label className="text-[10px] font-black uppercase block mb-1 text-slate-400">Centro de Custo</label>
                   <select className="w-full px-4 py-2 bg-white border border-slate-200 rounded-2xl font-bold text-xs outline-none" value={formData.costCenter} onChange={e => setFormData({...formData, costCenter: e.target.value})} >
                     {COST_CENTERS.map(cc => <option key={cc.id} value={cc.id}>{cc.name}</option>)}
                   </select>
                 </div>
+              </div>
+
+              {formData.type === 'INCOME' && formData.category === 'TITHE' && (
+                <div className="p-6 bg-emerald-50 rounded-[2rem] border border-emerald-100 animate-in slide-in-from-top-2">
+                   <label className="text-[10px] font-black uppercase block mb-2 text-emerald-700 flex items-center gap-2"><User size={14}/> Selecionar Membro (Dizimista)</label>
+                   <select 
+                    className="w-full px-4 py-2 bg-white border border-emerald-200 rounded-2xl font-bold text-xs outline-none focus:ring-2 focus:ring-emerald-500" 
+                    value={formData.memberId} 
+                    onChange={e => setFormData({...formData, memberId: e.target.value})}
+                   >
+                     <option value="">-- Selecione o Membro --</option>
+                     {members.map(m => <option key={m.id} value={m.id}>{m.name} ({m.ecclesiasticalPosition || 'Membro'})</option>)}
+                   </select>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-black uppercase block mb-1 text-slate-400">Conta / Caixa Ativo</label>
                   <select className="w-full px-4 py-2 bg-white border border-slate-200 rounded-2xl font-bold text-xs outline-none" value={formData.accountId} onChange={e => setFormData({...formData, accountId: e.target.value})} >
                     {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
                   </select>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                 <div>
+                <div>
                    <label className="text-[10px] font-black uppercase block mb-1 text-slate-400">Natureza da Operação (FISCAL)</label>
                    <select className="w-full px-4 py-2 bg-white border border-slate-200 rounded-2xl font-bold text-xs outline-none" value={formData.operationNature} onChange={e => setFormData({...formData, operationNature: e.target.value})} >
                     {OPERATION_NATURES.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
                    </select>
                  </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
                  <div>
                    <label className="text-[10px] font-black uppercase block mb-1 text-slate-400">Fornecedor / Favorecido</label>
                    <input className="w-full px-4 py-2 bg-white border border-slate-200 rounded-2xl font-bold text-xs" value={formData.providerName} onChange={e => setFormData({...formData, providerName: e.target.value})} placeholder="Ex: CPFL, Sabesp, Nome Fornecedor..." />

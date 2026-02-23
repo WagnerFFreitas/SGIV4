@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MessageSquare, Send, Sparkles, PencilLine, Eraser, History, Clock, AlertTriangle } from 'lucide-react';
+import { MessageSquare, Send, Sparkles, PencilLine, Eraser, History, Clock, AlertTriangle, Mail } from 'lucide-react';
 import { geminiService } from '../services/geminiService';
 import { Member, Payroll } from '../types';
 
@@ -41,6 +41,22 @@ export const Comunicacao: React.FC<ComunicacaoProps> = ({ members = [], employee
   const handleSendWhatsApp = () => {
     if (!finalMessage) return;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(finalMessage)}`, '_blank');
+  };
+
+  const handleSendEmail = () => {
+    if (!finalMessage) return;
+    
+    // Coleta emails únicos de membros (e funcionários se tivessem o campo)
+    const memberEmails = members.map(m => m.email).filter(Boolean);
+    const employeeEmails = employees.map(e => e.email).filter(Boolean);
+    const allEmails = Array.from(new Set([...memberEmails, ...employeeEmails]));
+    
+    const bcc = allEmails.join(',');
+    const subject = encodeURIComponent("Informativo ADJPA");
+    const body = encodeURIComponent(finalMessage);
+    
+    // Abre o gerenciador de e-mail padrão com BCC
+    window.location.href = `mailto:?bcc=${bcc}&subject=${subject}&body=${body}`;
   };
 
   return (
@@ -99,8 +115,9 @@ export const Comunicacao: React.FC<ComunicacaoProps> = ({ members = [], employee
             <h3 className="font-black text-xl flex items-center gap-2 uppercase tracking-tighter mb-6"><PencilLine size={20} className="text-indigo-300" /> Revisão Pastoral</h3>
             <textarea className="flex-1 w-full bg-white/5 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/10 text-indigo-100 leading-relaxed italic text-sm outline-none resize-none custom-scrollbar" value={finalMessage} onChange={(e) => setFinalMessage(e.target.value)} placeholder="Aguardando conteúdo..." />
             {finalMessage && (
-              <div className="mt-8 grid grid-cols-1 gap-4 animate-in slide-in-from-bottom-4">
-                <button onClick={handleSendWhatsApp} className="bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-emerald-400 transition-all shadow-lg flex items-center justify-center gap-3"><MessageSquare size={18}/> Compartilhar via WhatsApp</button>
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-bottom-4">
+                <button onClick={handleSendWhatsApp} className="bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-emerald-400 transition-all shadow-lg flex items-center justify-center gap-3"><MessageSquare size={18}/> WhatsApp</button>
+                <button onClick={handleSendEmail} className="bg-indigo-500 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-400 transition-all shadow-lg flex items-center justify-center gap-3"><Mail size={18}/> E-mail (BCC)</button>
               </div>
             )}
           </div>

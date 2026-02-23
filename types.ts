@@ -132,6 +132,7 @@ export interface TaxConfig {
   fgtsRate: number;
   patronalRate: number;
   ratRate: number;
+  terceirosRate: number;
 }
 
 export interface Member {
@@ -192,6 +193,8 @@ export interface Member {
   birthDate: string;
   gender: 'M' | 'F' | 'OTHER';
   maritalStatus: 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
+  spouseName?: string;
+  marriageDate?: string;
   spiritualGifts?: string;
   cellGroup?: string;
   
@@ -208,6 +211,8 @@ export interface Member {
   observations?: string;
   specialNeeds?: string;
   talents?: string;
+  tags?: string[];
+  familyId?: string;
   avatar: string;
 }
 
@@ -217,6 +222,7 @@ export interface Payroll {
   membro_id?: string;
   matricula: string;
   employeeName: string;
+  email?: string;
   cpf: string;
   rg: string;
   pis: string;

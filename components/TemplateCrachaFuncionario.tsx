@@ -11,10 +11,10 @@ export const TemplateCrachaFuncionario: React.FC<TemplateCrachaFuncionarioProps>
     id={id} 
     className="flex flex-row items-start justify-center print:mb-0 mb-8 bg-transparent flex-shrink-0 gap-[5mm]" 
     style={{ 
-      width: '176.2mm', // 85.6 * 2 + 5mm gap
-      height: '53.98mm', 
-      minWidth: '176.2mm', 
-      minHeight: '53.98mm',
+      width: '112.96mm', // 53.98 * 2 + 5mm gap
+      height: '85.6mm', 
+      minWidth: '112.96mm', 
+      minHeight: '85.6mm',
       pageBreakInside: 'avoid',
       breakInside: 'avoid',
       position: 'relative'
@@ -23,7 +23,7 @@ export const TemplateCrachaFuncionario: React.FC<TemplateCrachaFuncionarioProps>
     {/* FRENTE */}
     <div 
       className="relative flex flex-col p-3 shrink-0 bg-white overflow-hidden shadow-xl rounded-[1rem] border border-slate-200"
-      style={{ width: '85.6mm', height: '53.98mm' }}
+      style={{ width: '53.98mm', height: '85.6mm' }}
     >
       {/* Camada de Fundo Branco Base */}
       <div className="absolute inset-0 bg-white z-0" />
@@ -32,13 +32,14 @@ export const TemplateCrachaFuncionario: React.FC<TemplateCrachaFuncionarioProps>
       <img 
         src="img/fundo.png" 
         className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-10" 
+        style={{ filter: 'sepia(1) hue-rotate(40deg) saturate(5) brightness(1.1)' }}
         alt=""
         onError={(e) => (e.target as HTMLElement).style.display = 'none'}
       />
 
       {/* HEADER */}
-      <div className="relative z-20 flex items-start w-full mb-1 gap-[2.5mm]" style={{ marginTop: '-2.2mm' }}>
-        <div className="w-11 h-11 flex items-center justify-center shrink-0">
+      <div className="relative z-20 flex flex-col items-center w-full mb-3 gap-0">
+        <div className="w-12 h-12 flex items-center justify-center shrink-0">
           <img 
             src="img/logo.png" 
             className="w-full h-full object-contain" 
@@ -48,20 +49,18 @@ export const TemplateCrachaFuncionario: React.FC<TemplateCrachaFuncionarioProps>
             }}
           />
         </div>
-        <div className="flex-1 text-left overflow-hidden flex flex-col gap-[0.2mm] min-w-0" style={{ marginTop: '2.4mm' }}>
-          <p className="text-[8.5px] font-black text-[#003399] leading-normal uppercase tracking-tighter whitespace-nowrap overflow-visible">ASSEMBLEIA DE DEUS JESUS QUE ALIMENTA</p>
-          <p className="text-[6.2px] font-bold text-slate-500 uppercase leading-none mt-0.5">RUA GERICINÓ, QD04 LT22 - STA CRUZ DA SERRA</p>
-          <p className="text-[6.2px] font-bold text-slate-500 uppercase leading-none">DUQUE DE CAXIAS - RJ - CEP 25240-170</p>
-          <p className="text-[6.2px] font-bold text-slate-500 uppercase leading-none">CNPJ 09.432.897/0001-05</p>
-          <p className="text-[6.2px] font-black text-[#003399] uppercase leading-none">TEL.: (21) 2675-7036</p>
-          <p className="text-[6.2px] font-black text-[#003399] uppercase leading-none opacity-70">RECURSOS HUMANOS</p>
+        <div className="text-center overflow-hidden flex flex-col gap-[0.2mm] w-full -mt-1">
+          <p className="text-[7.5px] font-black text-[#003399] leading-normal uppercase tracking-tighter whitespace-nowrap overflow-visible">ASSEMBLEIA DE DEUS JESUS QUE ALIMENTA</p>
+          <p className="text-[5.5px] font-bold text-slate-500 uppercase leading-none mt-0.5">CNPJ 09.432.897/0001-05</p>
+          <p className="text-[5.5px] font-black text-[#003399] uppercase leading-none mt-0.5">TEL.: (21) 2675-7036</p>
+          <p className="text-[5.5px] font-black text-[#003399] uppercase leading-none opacity-70">RECURSOS HUMANOS</p>
         </div>
       </div>
 
-      <div className="relative z-20 flex flex-1 items-center gap-3 px-1 mt-[-3mm]">
+      <div className="relative z-20 flex flex-col flex-1 items-center gap-3 px-1">
         <div 
           className="rounded-lg border-2 border-[#003399] p-0.5 flex items-center justify-center overflow-hidden shrink-0 shadow-md bg-white"
-          style={{ width: '20mm', height: '25mm', minWidth: '20mm', minHeight: '25mm' }}
+          style={{ width: '25mm', height: '32mm', minWidth: '25mm', minHeight: '32mm' }}
         >
           <div className="w-full h-full rounded-[0.4rem] bg-slate-50 overflow-hidden">
             <img 
@@ -72,20 +71,10 @@ export const TemplateCrachaFuncionario: React.FC<TemplateCrachaFuncionarioProps>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-center overflow-hidden">
-           <h4 className="text-[11px] font-black text-slate-900 uppercase leading-tight mb-1 truncate">{employee.employeeName}</h4>
-           <p className="text-[9px] font-bold text-[#003399] uppercase leading-none mb-0.5">{employee.cargo}</p>
-           <p className="text-[7.5px] font-medium text-[#003399]/60 uppercase leading-none truncate">{employee.departamento}</p>
-           
-           <div className="mt-1.5 flex justify-start">
-              <div className="w-9 h-9 bg-white p-0.5 border border-slate-200 rounded shadow-sm">
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(employee.id)}`}
-                  alt="QR Code"
-                  className="w-full h-full"
-                />
-              </div>
-           </div>
+        <div className="flex-1 flex flex-col items-center justify-center overflow-hidden text-center w-full">
+           <h4 className="text-[12px] font-black text-slate-900 uppercase leading-tight mb-1 truncate w-full">{employee.employeeName}</h4>
+           <p className="text-[10px] font-bold text-[#003399] uppercase leading-none mb-0.5">{employee.cargo}</p>
+           <p className="text-[8px] font-medium text-[#003399]/60 uppercase leading-none truncate w-full">{employee.departamento}</p>
         </div>
       </div>
     </div>
@@ -93,12 +82,13 @@ export const TemplateCrachaFuncionario: React.FC<TemplateCrachaFuncionarioProps>
     {/* VERSO */}
     <div 
       className="relative flex flex-col p-5 shrink-0 bg-white overflow-hidden shadow-xl rounded-[1rem] border border-slate-200"
-      style={{ width: '85.6mm', height: '53.98mm' }}
+      style={{ width: '53.98mm', height: '85.6mm' }}
     >
       {/* Marca d'água Fundo Verso */}
       <img 
         src="img/fundo.png" 
-        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" 
+        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-10" 
+        style={{ filter: 'sepia(1) hue-rotate(40deg) saturate(5) brightness(1.1)' }}
         alt=""
         onError={(e) => (e.target as HTMLElement).style.display = 'none'}
       />

@@ -42,7 +42,8 @@ export const TemplateCarteiraMembro: React.FC<TemplateCarteiraMembroProps> = ({ 
         <div className="absolute inset-0 bg-white z-0" />
         <img 
           src="img/fundo.png" 
-          className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none z-10" 
+          className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-10" 
+          style={{ filter: 'sepia(1) hue-rotate(40deg) saturate(5) brightness(1.1)' }}
           alt=""
           crossOrigin="anonymous"
           onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
@@ -167,7 +168,8 @@ export const TemplateCarteiraMembro: React.FC<TemplateCarteiraMembroProps> = ({ 
         <div className="absolute inset-0 bg-white z-0" />
         <img 
           src="img/fundo.png" 
-          className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none z-10" 
+          className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-10" 
+          style={{ filter: 'sepia(1) hue-rotate(40deg) saturate(5) brightness(1.1)' }}
           alt=""
           crossOrigin="anonymous"
           onError={(e) => (e.target as HTMLElement).style.display = 'none'}

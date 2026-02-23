@@ -126,13 +126,22 @@ export const Layout: React.FC<LayoutProps> = ({
               <ChevronDown size={10} />
             </button>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-right">
-              <p className="text-[10px] font-black text-slate-900 leading-none">{user.name}</p>
-              <p className="text-[8px] text-indigo-600 font-black uppercase">{user.role}</p>
-            </div>
-            <div className="w-7 h-7 rounded bg-slate-100 border border-slate-200 overflow-hidden">
-              <img src={user.avatar} className="w-full h-full object-cover" />
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className={`p-1.5 rounded-lg transition-colors ${activeTab === 'settings' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'}`}
+              title="Configurações"
+            >
+              <Settings size={16} />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="text-right">
+                <p className="text-[10px] font-black text-slate-900 leading-none">{user.name}</p>
+                <p className="text-[8px] text-indigo-600 font-black uppercase">{user.role}</p>
+              </div>
+              <div className="w-7 h-7 rounded bg-slate-100 border border-slate-200 overflow-hidden">
+                <img src={user.avatar} className="w-full h-full object-cover" />
+              </div>
             </div>
           </div>
         </header>
